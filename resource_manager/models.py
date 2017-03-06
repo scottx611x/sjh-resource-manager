@@ -49,3 +49,24 @@ class CustomUser(models.Model):
 
     def get_ebs_volume(self):
         pass
+
+
+class NodeManager(models.Manager):
+    def add_user(self, user_instance):
+        self.model.users.add(user_instance)
+
+    def remove_user(self, user_instance):
+        self.model.users.remove(user_instance)
+
+
+class Node(models.Model):
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4,
+                            editable=False)
+    ip = models.GenericIPAddressField(protocol="IPv4")
+    port = models.IntegerField()
+    users = models.ManyToManyField(CustomUser, blank=True)
+
+    def __str__(self):
+        return "{}:{} - {}".format(
+            self.ip, self.port, self.users.all()
+        )
