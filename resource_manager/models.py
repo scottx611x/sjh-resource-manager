@@ -16,39 +16,6 @@ class Node(models.Model):
             self.private_ip, self.ec2_id
         )
 
-
-class UserManager(models.Manager):
-    def create_user(self, email):
-        """
-        Creates and saves a User with the given email, date of
-        birth and password.
-        """
-        if not email:
-            raise ValueError('Users must have an email address')
-
-        user = self.model(
-            email=self.normalize_email(email)
-        )
-
-        user.save(using=self._db)
-        return user
-
-    @classmethod
-    def normalize_email(cls, email):
-        """
-        Normalize the address by lowercasing the domain part of the email
-        address.
-        """
-        email = email or ''
-        try:
-            email_name, domain_part = email.strip().rsplit('@', 1)
-        except ValueError:
-            pass
-        else:
-            email = '@'.join([email_name, domain_part.lower()])
-        return email
-
-
 class JupyterUser(models.Model):
     PORTS = (
         ("PORT_50001", '50001'),
