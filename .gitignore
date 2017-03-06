@@ -88,3 +88,4 @@ ENV/
 # Rope project settings
 .ropeproject
 sjh-resource-manager.iml
+/static
