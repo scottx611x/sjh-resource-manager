@@ -12,11 +12,13 @@ Django app to handle AWS resource management of https://github.com/hms-dbmi/scal
 git clone https://github.com/scottx611x/sjh-resource-manager.git && cd sjh-resource-manager
 mkvirtualenv sjh-resource-manager
 workon sjh-resource-manager
+pip install awscli
 pip install -r requirements.txt
 ```
 
 ## Running it all: 
 ```
+aws configure
 ./manage.py createsuperuser
 ./manage.py collectstatic
 ./manage.py makemigrations
