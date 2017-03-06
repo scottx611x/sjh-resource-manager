@@ -15,6 +15,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='node',
             name='users',
-            field=models.ManyToManyField(blank=True, null=True, to='resource_manager.CustomUser'),
+            field=models.ManyToManyField(blank=True, null=True, to='resource_manager.models.JupyterUser'),
         ),
     ]

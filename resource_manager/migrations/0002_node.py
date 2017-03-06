@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('uuid', models.UUIDField(default=uuid.uuid4, editable=False)),
                 ('ip', models.GenericIPAddressField(protocol='IPv4')),
                 ('port', models.IntegerField()),
-                ('users', models.ManyToManyField(to='resource_manager.CustomUser')),
+                ('users', models.ManyToManyField(to='resource_manager.models.JupyterUser')),
             ],
         ),
     ]

@@ -5,6 +5,18 @@ import uuid as uuid
 from django.db import models
 
 
+class Node(models.Model):
+    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4,
+                            editable=False)
+    private_ip = models.GenericIPAddressField(protocol="IPv4", blank=False)
+    ec2_id = models.CharField(max_length=100, blank=False, unique=True)
+
+    def __str__(self):
+        return "{}: {}".format(
+            self.private_ip, self.ec2_id
+        )
+
+
 class UserManager(models.Manager):
     def create_user(self, email):
         """
@@ -37,36 +49,28 @@ class UserManager(models.Manager):
         return email
 
 
-class CustomUser(models.Model):
+class JupyterUser(models.Model):
+    PORTS = (
+        ("PORT_50001", '50001'),
+        ("PORT_50002", '50002'),
+        ("PORT_50003", '50003'),
+        ("PORT_50004", '50004')
+    )
+
     uuid = models.UUIDField(primary_key=False, default=uuid.uuid4,
                             editable=False)
     email = models.EmailField(unique=True)
+    node = models.ForeignKey(Node)
+    port = models.CharField(max_length=10, choices=PORTS, blank=False,
+                            default="PORT_50001")
 
     objects = UserManager()
+
+    class Meta:
+        unique_together = (("node", "port"),)
 
     def __str__(self):
         return "{}".format(self.email)
 
     def get_ebs_volume(self):
         pass
-
-
-class NodeManager(models.Manager):
-    def add_user(self, user_instance):
-        self.model.users.add(user_instance)
-
-    def remove_user(self, user_instance):
-        self.model.users.remove(user_instance)
-
-
-class Node(models.Model):
-    uuid = models.UUIDField(primary_key=False, default=uuid.uuid4,
-                            editable=False)
-    ip = models.GenericIPAddressField(protocol="IPv4")
-    port = models.IntegerField()
-    users = models.ManyToManyField(CustomUser, blank=True)
-
-    def __str__(self):
-        return "{}:{} - {}".format(
-            self.ip, self.port, self.users.all()
-        )

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, Node
+from .models import JupyterUser, Node
 
 
 class AdminFieldPopulator(admin.ModelAdmin):
@@ -11,12 +11,12 @@ class AdminFieldPopulator(admin.ModelAdmin):
         self.list_display = [field.name for field in model._meta.fields]
 
 
-class CustomUserAdmin(AdminFieldPopulator):
+class JupyterUserAdmin(AdminFieldPopulator):
     pass
 
 
 class NodeAdmin(AdminFieldPopulator):
     pass
 
-admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(JupyterUser, JupyterUserAdmin)
 admin.site.register(Node, NodeAdmin)
