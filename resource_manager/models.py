@@ -31,8 +31,6 @@ class JupyterUser(models.Model):
     port = models.CharField(max_length=10, choices=PORTS, blank=False,
                             default="PORT_50001")
 
-    objects = UserManager()
-
     class Meta:
         unique_together = (("node", "port"),)
 
