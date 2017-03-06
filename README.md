@@ -17,6 +17,8 @@ pip install -r requirements.txt
 
 ## Running it all: 
 ```
+./manage.py createsuperuser
+./manage.py collectstatic
 ./manage.py makemigrations
 ./manage.py migrate
 ./manage.py runserver <ip>:<port>
