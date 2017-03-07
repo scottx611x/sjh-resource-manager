@@ -25,3 +25,10 @@ aws configure
 ./manage.py migrate
 ./manage.py runserver <ip>:<port>
 ```
+## API:
+```
+# Populate JupyterNode model with your N EC2 instances ids and private ips
+
+PUT http://<ip>:<port>/resource_manager/jupyter_users/scott@scott.com/?volume=/cool/path/to/scotts/volume/
+  creates a JupyterUser <scott@scott.com>, creates a new EBS Volume and assocites its id with said user, and checks for the "Fullest" Jupyter EC2 Node and associates it with the JupyterUser
+  ```
