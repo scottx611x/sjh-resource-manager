@@ -70,7 +70,6 @@ def attach_ebs_volume(ebs_id, ec2_id, special_device):
         print e
         return False
     else:
-        time.sleep(5)
         return True
 
 
@@ -135,9 +134,4 @@ def detach_ebs(ebs_id, ec2_id, special_device):
         print e
         return False
     else:
-        time.sleep(5)
         return True
-
-
-
-
