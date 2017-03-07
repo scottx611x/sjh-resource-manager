@@ -14,6 +14,7 @@ class JupyterUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=False)
     port = serializers.CharField(required=False)
     ebs_volume_id = serializers.CharField(required=False)
+    ebs_volume_attached = serializers.CharField(required=False)
 
     class Meta:
         model = JupyterUser
