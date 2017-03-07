@@ -1,4 +1,8 @@
 import boto3
+import paramiko
+import time
+
+from django.conf import settings
 
 from resource_manager.models import JupyterNode, JupyterUser
 
@@ -40,31 +44,100 @@ def create_ebs_volume():
     )
     return response["VolumeId"]
 
+
+def attach_ebs_volume(ebs_id, ec2_id, special_device):
+    ec2_client.attach_volume(
+        DryRun=False,
+        VolumeId=ebs_id,
+        InstanceId=ec2_id,
+        Device=special_device
+    )
+    waiter = ec2_client.get_waiter('instance_exists')
+    try:
+        waiter.wait(
+            DryRun=False,
+            InstanceIds=[ec2_id],
+            Filters=[
+                {
+                    'Name': 'block-device-mapping.status',
+                    'Values': [
+                        'attached',
+                    ]
+                },
+            ]
+        )
+    except Exception as e:
+        print e
+        return False
+    else:
+        time.sleep(5)
+        return True
+
+
+def mount_linux_device(ec2_pub_dns, username, v_dev, volume_path):
+    ssh = paramiko.SSHClient()
+    key = paramiko.RSAKey.from_private_key_file(settings.PKEY)
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(ec2_pub_dns, username=username, pkey=key)
+
+    stdin, stdout, stderr = ssh.exec_command("sudo mkdir -p {}".format(volume_path))
+    stdout = stdout.readlines()
+    stderr = stderr.readlines()
+
+    stdin, stdout, stderr = ssh.exec_command(
+        "sudo yes | sudo mkfs -t ext3 {}".format( v_dev.replace("/sd", "/xvd"))
+    )
+    stdout = stdout.readlines()
+    stderr = stderr.readlines()
+
+    stdin, stdout, stderr = ssh.exec_command(
+        "sudo mount {} {}".format(v_dev.replace("/sd", "/xvd"), volume_path))
+    stdout = stdout.readlines()
+    stderr = stderr.readlines()
+
+    ssh.close()
+
+
 def describe_ec2():
     print ec2_client.describe_instances()
 
+
 def start_ec2(ec2_id):
-    ec2_client.instances.filter(InstanceIds=ec2_id).start()
+    ec2_client.instances.filter(InstanceIds=[ec2_id]).start()
+
 
 def stop_ec2(ec2_id):
-    ec2_client.instances.filter(InstanceIds=ec2_id).stop()
+    ec2_client.instances.filter(InstanceIds=[ec2_id]).stop()
 
-def attach_ebs(user_volume_id, ec2_to_attach_to):
-    volume = main_ec2.Volume(user_volume_id)
-    response = volume.attach_to_instance(
-        InstanceId=ec2_to_attach_to,
-        Device='string'
+
+def detach_ebs(ebs_id, ec2_id, special_device):
+    ec2_client.attach_volume(
+        DryRun=False,
+        VolumeId=ebs_id,
+        InstanceId=ec2_id,
+        Device=special_device
     )
+    waiter = ec2_client.get_waiter('instance_exists')
+    try:
+        waiter.wait(
+            DryRun=False,
+            InstanceIds=[ec2_id],
+            Filters=[
+                {
+                    'Name': 'block-device-mapping.status',
+                    'Values': [
+                        'detached',
+                    ]
+                },
+            ]
+        )
+    except Exception as e:
+        print e
+        return False
+    else:
+        time.sleep(5)
+        return True
 
-def detach_ebs(user_volume_id, ec2_to_detach_from):
-    volume = main_ec2.Volume(user_volume_id)
-    response = volume.detach_from_instance(
-        InstanceId=ec2_to_detach_from,
-        Device='string'
-    )
-
-def ip_for_user(email, user_volume_name):
-    ec2_client.instances.filter()
 
 
 
