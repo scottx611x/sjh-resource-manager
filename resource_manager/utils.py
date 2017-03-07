@@ -52,14 +52,14 @@ def attach_ebs_volume(ebs_id, ec2_id, special_device):
         InstanceId=ec2_id,
         Device=special_device
     )
-    waiter = ec2_client.get_waiter('instance_exists')
+    waiter = ec2_client.get_waiter('volume_in_use')
     try:
         waiter.wait(
             DryRun=False,
-            InstanceIds=[ec2_id],
+            VolumeIds=[ebs_id],
             Filters=[
                 {
-                    'Name': 'block-device-mapping.status',
+                    'Name': 'attachment.status',
                     'Values': [
                         'attached',
                     ]
@@ -67,7 +67,6 @@ def attach_ebs_volume(ebs_id, ec2_id, special_device):
             ]
         )
     except Exception as e:
-        print e
         return False
     else:
         return True
@@ -110,28 +109,5 @@ def stop_ec2(ec2_id):
 
 
 def detach_ebs(ebs_id, ec2_id, special_device):
-    ec2_client.attach_volume(
-        DryRun=False,
-        VolumeId=ebs_id,
-        InstanceId=ec2_id,
-        Device=special_device
-    )
-    waiter = ec2_client.get_waiter('instance_exists')
-    try:
-        waiter.wait(
-            DryRun=False,
-            InstanceIds=[ec2_id],
-            Filters=[
-                {
-                    'Name': 'block-device-mapping.status',
-                    'Values': [
-                        'detached',
-                    ]
-                },
-            ]
-        )
-    except Exception as e:
-        print e
-        return False
-    else:
-        return True
+    pass
+
