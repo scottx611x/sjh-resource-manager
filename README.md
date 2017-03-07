@@ -19,12 +19,12 @@ pip install -r requirements.txt
 ## Running it all: 
 ```
 aws configure
-./manage.py createsuperuser
-./manage.py collectstatic
 ./manage.py makemigrations
 ./manage.py migrate
+./manage.py loaddata resource_manager/fixtures/superuser.json
 ./manage.py runserver <ip>:<port>
 ```
+
 ## API:
 ```
 # Populate JupyterNode model with your N EC2 instances ids and private ips
