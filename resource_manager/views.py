@@ -1,8 +1,14 @@
-from django.http import HttpResponseServerError
-from rest_framework import viewsets
+import json
 
-from resource_manager.models import JupyterUser
+from django.db import transaction, IntegrityError
+from django.forms import model_to_dict
+from django.http import HttpResponseServerError, JsonResponse
+from rest_framework import viewsets
+from rest_framework.response import Response
+
+from resource_manager.models import JupyterUser, JupyterNode
 from resource_manager.serializers import JupyterUserSerializer
+from resource_manager.utils import get_fullest_node, create_ebs_volume
 
 
 class JupyterUserViewSet(viewsets.ModelViewSet):
@@ -24,9 +30,39 @@ class JupyterUserViewSet(viewsets.ModelViewSet):
             except JupyterUser.MultipleObjectsReturned:
                 return HttpResponseServerError()
             except JupyterUser.DoesNotExist:
-                return JupyterUser.objects.create(
-                    email=self.kwargs.get('email')
+                data = {
+                    "email": self.kwargs.get('email'),
+                    "volume_name": self.request.query_params["volume"]
+                }
+
+                jupyter_user = JupyterUser(
+                    email=self.kwargs.get('email'),
+                    volume_name=self.request.query_params["volume"]
                 )
+                serializer = self.serializer_class(jupyter_user, data=data)
+                if serializer.is_valid():
+                    serializer.save()
+                    node = get_fullest_node()
+                    jupyter_user.node = node
+                    jupyter_user.save()
+
+                    for port in ["50001", "50002", "50003", "50004"]:
+                        try:
+                            jupyter_user.port = port
+                            with transaction.atomic():
+                                jupyter_user.save()
+                        except IntegrityError:
+                            continue
+                        else:
+                            ebs_id = create_ebs_volume()
+                            jupyter_user.ebs_volume_id = ebs_id
+                            jupyter_user.save()
+
+                            return jupyter_user
+                else:
+                    return Response(serializer.errors,
+                                    status=400)
+
             else:
                 return JupyterUser.objects.get(
                     email=self.kwargs.get('email')

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import JupyterUser, Node
+from .models import JupyterUser, JupyterNode
 
 
 class AdminFieldPopulator(admin.ModelAdmin):
@@ -15,8 +15,8 @@ class JupyterUserAdmin(AdminFieldPopulator):
     pass
 
 
-class NodeAdmin(AdminFieldPopulator):
+class JupyterNodeAdmin(AdminFieldPopulator):
     pass
 
 admin.site.register(JupyterUser, JupyterUserAdmin)
-admin.site.register(Node, NodeAdmin)
+admin.site.register(JupyterNode, JupyterNodeAdmin)
