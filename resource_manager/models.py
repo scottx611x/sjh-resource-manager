@@ -18,25 +18,6 @@ class JupyterNode(models.Model):
             self.private_ip, self.ec2_id
         )
 
-    def get_status(self):
-        ec2_client = boto3.client('ec2')
-        waiter.wait(
-            DryRun=True | False,
-            InstanceIds=[
-                'string',
-            ],
-            Filters=[
-                {
-                    'Name': 'string',
-                    'Values': [
-                        'string',
-                    ]
-                },
-            ],
-            NextToken='string',
-            MaxResults=123
-        )
-
 
 class JupyterUser(models.Model):
     PORTS = (
@@ -51,6 +32,7 @@ class JupyterUser(models.Model):
     ebs_volume_id = models.CharField(max_length=100, blank=True, unique=True)
     node = models.ForeignKey(JupyterNode, blank=True, null=True)
     port = models.CharField(max_length=5, choices=PORTS, blank=True, null=True)
+    ebs_volume_attached = models.BooleanField(default=False)
 
     class Meta:
         unique_together = (("node", "port"),)
